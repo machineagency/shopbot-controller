@@ -65,11 +65,11 @@ namespace WindowsFormsApplication1
         private double Loc6;
         private int OutputS;
         private int inputS;
-        private int Status =-1;
+        private int Status = -1;
         private double X = 0;
         private double Y = 0;
         private double Z = 0;
-        
+
         private double Analog11;
         private double Analog22;
         private double _analog1;
@@ -96,7 +96,8 @@ namespace WindowsFormsApplication1
         Random rnd = new Random();
         WebSocket ws;
 
-        public Form1(){
+        public Form1()
+        {
             InitializeComponent();
             commandList = new ArrayList();
             commandQueue = new ArrayList();
@@ -117,12 +118,12 @@ namespace WindowsFormsApplication1
             System.Diagnostics.Debug.WriteLine(commandList);
 
             runCount = 0;
-            // System.Diagnostics.Debug.WriteLine("Shopbot position:" + readX() + "," + readY() + "," + readZ());
+            System.Diagnostics.Debug.WriteLine("Shopbot position:" + readX() + "," + readY() + "," + readZ());
 
             tmr = new System.Timers.Timer();
             tmr.Interval = 50;
             tmr.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            
+
 
             cmmdtmr = new System.Timers.Timer();
             cmmdtmr.Interval = 500;
@@ -137,7 +138,7 @@ namespace WindowsFormsApplication1
         //              messages back to this tcp client application
         private void connectToServer()
         {
-           ws = new WebSocket("ws://pure-beach-75578.herokuapp.com/", "fabricator");
+            ws = new WebSocket("ws://machineagency-shopbot-server.herokuapp.com/", "fabricator");
             ws.OnMessage += (sender, e) =>
             {
                 Console.WriteLine("server says: " + e.Data);
@@ -150,13 +151,15 @@ namespace WindowsFormsApplication1
                     cmmdtmr.Stop();
 
                     var fileName = "line_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".sbp";
+                    var directory = "C:\\SbParts\\lines\\";
+                    var fullFileName = directory + fileName;
                     commandQueue.Add(fileName);
 
-                    using (StreamWriter sw = new StreamWriter(@fileName))
+                    using (StreamWriter sw = new StreamWriter(fullFileName))
                     {
                         foreach (var item in gcodeArray.Children<JValue>())
                         {
-                            //Console.WriteLine("gcode line: " + item.ToString());
+                            Console.WriteLine("gcode line: " + item.ToString());
                             sw.WriteLine(item.ToString());
 
                         }
@@ -164,7 +167,7 @@ namespace WindowsFormsApplication1
                     }
 
                     cmmdtmr.Start();
-                   
+
                     Console.WriteLine("cmmdtmr.enabled" + cmmdtmr.Enabled);
                 }
                 else
@@ -180,12 +183,17 @@ namespace WindowsFormsApplication1
             ws.OnOpen += (sender, e) =>
             {
                 Console.WriteLine("web socket opened" + e);
-              this.sendCommand("FS, C:\\Users\\ShopBot\\Desktop\\Debug\\, c:\\SbParts\\Custom\\");
+                this.sendCommand("FS, C:\\SbParts\\lines, C:\\SbParts\\Custom\\");
+                // this.sendCommand("FS, C:\\Users\\ShopBot\\Desktop\\Debug\\, c:\\SbParts\\Custom\\");
                 Thread.Sleep(1000);
                 this.sendCommand("VR, .2, .1, .4, 10, .1, .4, .4, 10, 1, .200, 100, .150, 65, 0, 0, .200, .250");
                 Thread.Sleep(1000);
 
-                 this.sendCommand("SW, 0, , ");
+                this.sendCommand("SW, 0, , ");
+
+                // Thread.Sleep(1000);
+
+                // this.sendCommand("MX,10");
 
                 tmr.Start();
 
@@ -204,8 +212,8 @@ namespace WindowsFormsApplication1
             //this.y_out.Text = Conversions.ToString(readY());
             // this.z_out.Text = Conversions.ToString(readZ());
 
-           var _status = readStatus();
-            var _x  = readX();
+            var _status = readStatus();
+            var _x = readX();
             var _y = readY();
             var _z = readZ();
             var send = false;
@@ -233,7 +241,7 @@ namespace WindowsFormsApplication1
                 this.Status = _status;
                 send = true;
             }
-           // System.Diagnostics.Debug.WriteLine("send=" + send + ","+ _x + "," + X + "," + _status + "," + Status);
+            // System.Diagnostics.Debug.WriteLine("send=" + send + ","+ _x + "," + X + "," + _status + "," + Status);
             if (send == true)
             {
                 var json = new JObject(new JProperty("type", "fabricatior_data"),
@@ -300,7 +308,7 @@ namespace WindowsFormsApplication1
         {
 
             Console.WriteLine("command queue contents: [");
-            for (int i =0;i<commandQueue.Count; i++)
+            for (int i = 0; i < commandQueue.Count; i++)
             {
                 Console.WriteLine(commandQueue[i]);
             }
@@ -310,15 +318,18 @@ namespace WindowsFormsApplication1
             if (commandQueue.Count > 0)
             {
                 var _status = this.readStatus();
+                Console.WriteLine(_status.ToString());
                 if (_status == 0)
+                // if (true)
                 {
                     //outputField.Text = "sending command to shopbot:" + commandQueue.Count + ":" + this.Status;
                     var command = "FP, " + commandQueue[0] + ", 1, 1, 1, 1, 0, -0.00, 0, 0, 1, 1";
                     this.sendCommand(command);
-                   //s this.command_entry.Text = command;
+                    //s this.command_entry.Text = command;
                     this.Status = -1;
                     commandQueue.RemoveAt(0);
-                    //Thread.Sleep(50);
+                    Console.WriteLine("command queue length: " + commandQueue.Count.ToString() + ":" + this.Status);
+                    Thread.Sleep(50);
                 }
                 else
                 {
@@ -343,4 +354,3 @@ namespace WindowsFormsApplication1
         }
     }
 }
-
