@@ -117,7 +117,7 @@ namespace WindowsFormsApplication1
             System.Diagnostics.Debug.WriteLine(commandList);
 
             runCount = 0;
-            System.Diagnostics.Debug.WriteLine("Shopbot position:" + readX() + "," + readY() + "," + readZ());
+            // System.Diagnostics.Debug.WriteLine("Shopbot position:" + readX() + "," + readY() + "," + readZ());
 
             tmr = new System.Timers.Timer();
             tmr.Interval = 50;
