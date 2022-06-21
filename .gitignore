@@ -1,0 +1,5 @@
+.DS_Store
+*.sw*
+
+WindowsFormsApplication1/bin/
+WindowsFormsApplication1/obj/
