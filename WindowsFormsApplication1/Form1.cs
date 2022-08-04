@@ -92,21 +92,6 @@ namespace WindowsFormsApplication1
             commandList = new ArrayList();
             commandQueue = new ArrayList();
 
-            int counter = 0;
-            string line;
-
-            System.IO.StreamReader file = new StreamReader("drawing.sbp");
-            while ((line = file.ReadLine()) != null)
-            {
-                commandList.Add(line);
-                Console.WriteLine(line);
-                counter++;
-            }
-
-            file.Close();
-            Console.ReadLine();
-            System.Diagnostics.Debug.WriteLine(commandList);
-
             runCount = 0;
             System.Diagnostics.Debug.WriteLine("Shopbot position:" + readX() + "," + readY() + "," + readZ());
 
