@@ -69,7 +69,6 @@ namespace WindowsFormsApplication1
         private double X = 0;
         private double Y = 0;
         private double Z = 0;
-
         private double Analog11;
         private double Analog22;
         private double _analog1;
@@ -124,7 +123,6 @@ namespace WindowsFormsApplication1
             tmr.Interval = 50;
             tmr.Elapsed += new ElapsedEventHandler(OnTimedEvent);
 
-
             cmmdtmr = new System.Timers.Timer();
             cmmdtmr.Interval = 500;
             cmmdtmr.Elapsed += new ElapsedEventHandler(runCommand);
@@ -167,7 +165,6 @@ namespace WindowsFormsApplication1
                     }
 
                     cmmdtmr.Start();
-
                     Console.WriteLine("cmmdtmr.enabled" + cmmdtmr.Enabled);
                 }
                 else
@@ -354,3 +351,4 @@ namespace WindowsFormsApplication1
         }
     }
 }
+
