@@ -1,22 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Microsoft.VisualBasic.CompilerServices;
 
 using System.Net.Sockets;
 using System.Threading;
 using WebSocketSharp;
 using System.Collections;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Timers;
@@ -120,7 +111,7 @@ namespace WindowsFormsApplication1
             System.Diagnostics.Debug.WriteLine("Shopbot position:" + readX() + "," + readY() + "," + readZ());
 
             tmr = new System.Timers.Timer();
-            tmr.Interval = 50;
+            tmr.Interval = 15000;
             tmr.Elapsed += new ElapsedEventHandler(OnTimedEvent);
 
             cmmdtmr = new System.Timers.Timer();
@@ -238,14 +229,16 @@ namespace WindowsFormsApplication1
                 this.Status = _status;
                 send = true;
             }
-            // System.Diagnostics.Debug.WriteLine("send=" + send + ","+ _x + "," + X + "," + _status + "," + Status);
-            if (send == true)
+           // System.Diagnostics.Debug.WriteLine("send=" + send + ","+ _x + "," + X + "," + _status + "," + Status);
+            //if (send == true)
+            if (true)
             {
-                var json = new JObject(new JProperty("type", "fabricatior_data"),
+                var json = new JObject(new JProperty("type", "fabricator_data"),
                    new JProperty("x", _x),
                    new JProperty("y", _y),
                    new JProperty("z", _z),
-                   new JProperty("status", _status));
+                   new JProperty("status", _status),
+                   new JProperty("timestamp", DateAndTime.Now.ToString("HH:mm")));
 
                 ws.Send(json.ToString());
             }
