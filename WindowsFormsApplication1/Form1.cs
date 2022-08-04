@@ -195,6 +195,11 @@ namespace WindowsFormsApplication1
 
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
         {
+	    sendFabDataPacket();
+	}
+
+	private void sendFabDataPacket()
+	{
             //this.status_out.Text = Conversions.ToString(readStatus());
             //this.x_out.Text = Conversions.ToString(readX());
             //this.y_out.Text = Conversions.ToString(readY());
@@ -332,6 +337,7 @@ namespace WindowsFormsApplication1
             else
             {
                 cmmdtmr.Stop();
+		this.sendFabDataPacket();
             }
 
 
