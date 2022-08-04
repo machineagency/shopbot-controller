@@ -121,6 +121,13 @@ namespace WindowsFormsApplication1
                 {
 
                     var jsonObject = JToken.Parse(e.Data);
+                    // Check data type to see if it's a data poll
+                    String packetType = jsonObject.Value<String>("type");
+                    if (packetType == "requestMachineState")
+                    {
+                        this.sendFabDataPacket();
+                        return;
+                    }
                     var gcodeArray = jsonObject.Children<JProperty>().FirstOrDefault(x => x.Name == "data").Value as JArray;
                     cmmdtmr.Stop();
 
@@ -178,7 +185,7 @@ namespace WindowsFormsApplication1
 
         }
 
-        private void OnTimedEvent(object sender, ElapsedEventArgs e)
+    private void OnTimedEvent(object sender, ElapsedEventArgs e)
         {
 	    sendFabDataPacket();
 	}
@@ -322,7 +329,7 @@ namespace WindowsFormsApplication1
             else
             {
                 cmmdtmr.Stop();
-		this.sendFabDataPacket();
+		        this.sendFabDataPacket();
             }
 
 
