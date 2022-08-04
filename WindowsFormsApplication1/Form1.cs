@@ -233,7 +233,7 @@ namespace WindowsFormsApplication1
             //if (send == true)
             if (true)
             {
-                var json = new JObject(new JProperty("type", "fabricator_data"),
+                var json = new JObject(new JProperty("type", "fabricatorData"),
                    new JProperty("x", _x),
                    new JProperty("y", _y),
                    new JProperty("z", _z),
