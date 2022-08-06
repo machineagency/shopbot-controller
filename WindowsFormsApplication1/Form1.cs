@@ -73,6 +73,8 @@ namespace WindowsFormsApplication1
         private bool _inStack;
         private System.Timers.Timer tmr;
         private System.Timers.Timer cmmdtmr;
+        private System.Timers.Timer pollMachineBusyTimer;
+        private int currentPollStatus = 0;
         private int runCount;
         private string currentCommand;
         private ArrayList commandList;
@@ -100,9 +102,14 @@ namespace WindowsFormsApplication1
             tmr.Elapsed += new ElapsedEventHandler(OnTimedEvent);
 
             cmmdtmr = new System.Timers.Timer();
-            cmmdtmr.Interval = 500;
+            cmmdtmr.Interval = 100;
             cmmdtmr.Elapsed += new ElapsedEventHandler(runCommand);
             //cmmdtmr.Enabled = true;
+
+            pollMachineBusyTimer = new System.Timers.Timer();
+            pollMachineBusyTimer.Interval = 500;
+            pollMachineBusyTimer.Elapsed += new ElapsedEventHandler(pollMachineBusy);
+
             connectToServer();
         }
 
@@ -125,11 +132,11 @@ namespace WindowsFormsApplication1
                     String packetType = jsonObject.Value<String>("type");
                     if (packetType == "requestMachineState")
                     {
+                        Console.WriteLine("Sending machine state back to server.");
                         this.sendFabDataPacket();
                         return;
                     }
                     var gcodeArray = jsonObject.Children<JProperty>().FirstOrDefault(x => x.Name == "data").Value as JArray;
-                    cmmdtmr.Stop();
 
                     var fileName = "line_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".sbp";
                     var directory = "C:\\SbParts\\lines\\";
@@ -147,6 +154,7 @@ namespace WindowsFormsApplication1
                         sw.Close();
                     }
 
+                    pollMachineBusyTimer.Start();
                     cmmdtmr.Start();
                     Console.WriteLine("cmmdtmr.enabled" + cmmdtmr.Enabled);
                 }
@@ -171,7 +179,7 @@ namespace WindowsFormsApplication1
 
                 this.sendCommand("SW, 0, , ");
 
-                // Thread.Sleep(1000);
+                Thread.Sleep(1000);
 
                 // this.sendCommand("MX,10");
 
@@ -186,7 +194,7 @@ namespace WindowsFormsApplication1
         }
 
     private void OnTimedEvent(object sender, ElapsedEventArgs e)
-        {
+    {
 	    sendFabDataPacket();
 	}
 
@@ -291,9 +299,24 @@ namespace WindowsFormsApplication1
 
         }
 
+        private void pollMachineBusy(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            int maybeNewStatus = this.readStatus();
+;           if (this.currentPollStatus != maybeNewStatus)
+            {
+                Console.WriteLine("status change " + this.currentPollStatus
+                    + " -> " + maybeNewStatus);
+                this.currentPollStatus = maybeNewStatus;
+                this.sendFabDataPacket();
+            }
+            if (this.pollMachineBusyTimer.Enabled && maybeNewStatus == 0)
+            {
+                this.pollMachineBusyTimer.Stop();
+            }
+        }
+
         private void runCommand(object sender, System.Timers.ElapsedEventArgs e)
         {
-
             Console.WriteLine("command queue contents: [");
             for (int i = 0; i < commandQueue.Count; i++)
             {
@@ -307,32 +330,24 @@ namespace WindowsFormsApplication1
                 var _status = this.readStatus();
                 Console.WriteLine(_status.ToString());
                 if (_status == 0)
-                // if (true)
                 {
                     //outputField.Text = "sending command to shopbot:" + commandQueue.Count + ":" + this.Status;
                     var command = "FP, " + commandQueue[0] + ", 1, 1, 1, 1, 0, -0.00, 0, 0, 1, 1";
                     this.sendCommand(command);
                     //s this.command_entry.Text = command;
-                    this.Status = -1;
+                    // this.Status = -1;
                     commandQueue.RemoveAt(0);
                     Console.WriteLine("command queue length: " + commandQueue.Count.ToString() + ":" + this.Status);
                     Thread.Sleep(50);
-                }
-                else
-                {
-                    //outputField.Text = "status down:" + this.Status;
-
                 }
 
 
             }
             else
             {
+                Console.WriteLine("stopping command queue timer");
                 cmmdtmr.Stop();
-		        this.sendFabDataPacket();
             }
-
-
 
         }
 
